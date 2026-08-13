@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -36,18 +36,19 @@ class TestHTMLNode(unittest.TestCase):
             None,
         )
 
-    def test_props_to_html(self):
+    def test_to_html_props(self):
         node = HTMLNode(
             "div",
-            "Das ist ein div Container mit einem tollen Inhalt.",
+            "Hello, world!",
             None,
-            {"href": "https://www.google.com", "class": "boots"},
+            {"class": "greeting", "href": "https://boot.dev"},
         )
-
         self.assertEqual(
             node.props_to_html(),
-            'href="https://www.google.com" class="boots"',
+            ' class="greeting" href="https://boot.dev"',
         )
+
+
 
 
 if __name__ == "__main__":
