@@ -1,6 +1,6 @@
 import unittest
-from textnode import TextNode, TextType, text_node_to_html_node
-from delimiter import split_nodes_delimiter
+from textnode import TextNode, TextType
+from inline_markdown import split_nodes_delimiter
 
 
 class TestDelimiter(unittest.TestCase):
@@ -66,3 +66,6 @@ class TestDelimiter(unittest.TestCase):
             TextNode("more", TextType.CODE),
             TextNode(" code", TextType.TEXT),
         ])
+
+if __name__ == '__main__':
+    unittest.main()
