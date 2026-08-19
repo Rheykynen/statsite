@@ -42,3 +42,27 @@ class TestDelimiter(unittest.TestCase):
 
         with self.assertRaises(Exception):
             split_nodes_delimiter([node], "`", TextType.CODE)
+
+    def test_wrong_delimiter(self):
+        node = TextNode("This is text with a `code block` word", TextType.TEXT)
+        new_nodes = split_nodes_delimiter([node], "#", TextType.CODE)
+        self.assertEqual(new_nodes, [
+            TextNode("This is text with a `code block` word", TextType.TEXT),
+        ])
+
+    def test_no_delimiter(self):
+        node = TextNode("This is text with a type #h1# header", TextType.TEXT)
+        with self.assertRaises(Exception):
+            split_nodes_delimiter([node], "", TextType.TEXT)
+
+    def test_multiple_delimiters(self):
+        node = TextNode("This is text with a `code block` word and also some `more` code", TextType.TEXT)
+        new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+
+        self.assertEqual(new_nodes, [
+            TextNode("This is text with a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" word and also some ", TextType.TEXT),
+            TextNode("more", TextType.CODE),
+            TextNode(" code", TextType.TEXT),
+        ])
