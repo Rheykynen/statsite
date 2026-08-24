@@ -7,6 +7,7 @@ def split_nodes_delimiter(
 ) -> list[TextNode]:
     new_nodes = []
     for old_node in old_nodes:
+        print(old_node.text_type)
         if old_node.text_type != text_type.TEXT:
             new_nodes.append(old_node)
             continue
@@ -25,19 +26,23 @@ def split_nodes_delimiter(
 
     return new_nodes
 
+
+def extract_markdown_images(text):
+    matches = re.findall(r"!\[(.*?)\]\((https:.*?)\)", text)  # r"!\[([^\[\]]*)\]\(([^\(\)]*)\)" bootdev
+    return matches
+
 def extract_markdown_links(text):
-    matches = re.findall(r"!\[(.*?)\]\((https://.*?)\)", text)
+    matches = re.findall(r"\[(.*?)\]\((https.*?)\)", text) # r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)" bootdev
     return matches
     # /w+ funktioniert nicht, da es nur zusammenhängende Wörter akzeptiert. Da beim Beispiel nach 'Rick' ' Roll' kam,
     # hat der Regex bei space abgebrochen.
     # mit dem r"" braucht es kein backslash vor / und ebenso hat regex keine Funktion mit /, welche Backslash benötigen würde
 
-def extract_markdown_images(text):
-    matches = re.findall(r"\[(.*?)\]\((https.*?)\)", text)
-    return matches
-
 def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
-    pass
+    new_nodes = []
+    for old_node in old_nodes:
+        print("")
+
 
 def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
     pass
