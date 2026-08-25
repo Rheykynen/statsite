@@ -1,5 +1,6 @@
 import unittest
-from inline_markdown import extract_markdown_images, extract_markdown_links
+from inline_markdown import extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link
+from textnode import TextType, TextNode
 
 class TestDelimiter(unittest.TestCase):
     def test_link_extraction(self):
@@ -39,6 +40,22 @@ class TestDelimiter(unittest.TestCase):
                 ("another link", "https://wikipedia.org"),
             ],
             matches,
+        )
+
+    def test_split_images(self):
+        node = TextNode(
+            "This is text with an ![python logo](https://i.imgur.com/zjjcJKZ.png) and another ![the other logo](https://i.imgur.com/3elNhQu.png)",
+            TextType.TEXT,
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("This is text with an ", TextType.TEXT),
+                TextNode("python logo", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode("the other logo", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png"),
+            ],
+            new_nodes,
         )
 
 if __name__ == '__main__':
