@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from textnode import TextNode, TextType
 import re
 
@@ -32,32 +30,31 @@ def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
     new_nodes = []
     for old_node in old_nodes:
         text_contents = old_node.text
+        if not text_contents:
+            continue
 
         extracted = extract_markdown_images(text_contents) # List mit Tuplen der extrahierten Infos
+        if not extracted:
+            new_nodes.append(old_node)
+            continue
 
         for i in range(len(extracted)): # Das aktuelle alt / href tuple (image / https://something.com)
-            current_match = extracted[i]
-            image_alt = current_match[0] # image
-            href = current_match[1] # https://something.com
+            image_alt, href = extracted[i] # alt-Text und href des extrahierten Matches
 
-            delimiter = f"![{image_alt}]({href})"
+            img_delimiter = f"![{image_alt}]({href})" # der Delimiter, nach dem ich den Text splite
 
-            section = text_contents.split(delimiter, 1)
-            if section[0]:
-                new_nodes.append(TextNode(section[0], TextType.TEXT))
-                new_nodes.append(TextNode(current_match[0], TextType.IMAGE, current_match[1]))
-                text_contents = text_contents.replace(f"{section[0]}{delimiter}", "")
+            before, after = text_contents.split(img_delimiter, 1) # erster Splice, mit
 
-            elif section[1]:
-                new_nodes.append(TextNode(current_match[0], TextType.IMAGE, current_match[1]))
+            if before:
+                new_nodes.append(TextNode(before, TextType.TEXT))
 
-                new_nodes.append(TextNode(section[1], TextType.TEXT))
+            new_nodes.append(TextNode(image_alt, TextType.IMAGE, href))
 
-                text_contents = text_contents.replace(f"{section[0]}{delimiter}", "")
+            text_contents = after
 
-            #print(text_contents)
+        if len(text_contents) > 0:
+            new_nodes.append(TextNode(text_contents, TextType.TEXT))
 
-    #print(new_nodes)
     return new_nodes
 
 
@@ -66,30 +63,30 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
     new_nodes = []
     for old_node in old_nodes:
         text_contents = old_node.text
+        if not text_contents:
+            continue
 
-        extracted = extract_markdown_images(text_contents)  # List mit Tuplen der extrahierten Infos
+        extracted = extract_markdown_links(text_contents)  # List mit Tuplen der extrahierten Infos
+        if not extracted:
+            new_nodes.append(old_node)
+            continue
 
         for i in range(len(extracted)):  # Das aktuelle alt / href tuple (image / https://something.com)
-            current_match = extracted[i]
-            image_alt = current_match[0]  # image
-            href = current_match[1]  # https://something.com
+            target, href = extracted[i]  # alt-Text und href des extrahierten Matches
 
-            delimiter = f"[{image_alt}]({href})"
+            img_delimiter = f"[{target}]({href})"  # der Delimiter, nach dem ich den Text splite
 
-            section = text_contents.split(delimiter, 1)
-            if section[0]:
-                new_nodes.append(TextNode(section[0], TextType.TEXT))
-                new_nodes.append(TextNode(current_match[0], TextType.IMAGE, current_match[1]))
-                text_contents = text_contents.replace(f"{section[0]}{delimiter}", "")
+            before, after = text_contents.split(img_delimiter, 1)  # erster Splice, mit
 
-            elif section[1]:
-                new_nodes.append(TextNode(current_match[0], TextType.IMAGE, current_match[1]))
+            if before:
+                new_nodes.append(TextNode(before, TextType.TEXT))
 
-                new_nodes.append(TextNode(section[1], TextType.TEXT))
+            new_nodes.append(TextNode(target, TextType.LINK, href))
 
-                text_contents = text_contents.replace(f"{section[0]}{delimiter}", "")
+            text_contents = after
 
-            # print(text_contents)
+        if len(text_contents) > 0:
+            new_nodes.append(TextNode(text_contents, TextType.TEXT))
 
     return new_nodes
 
