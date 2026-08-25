@@ -29,30 +29,42 @@ def split_nodes_delimiter(
 def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
     new_nodes = []
     for old_node in old_nodes:
-        text_contents = old_node.text
-        if not text_contents:
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
             continue
+
+        text_contents = old_node.text
 
         extracted = extract_markdown_images(text_contents) # List mit Tuplen der extrahierten Infos
         if not extracted:
             new_nodes.append(old_node)
             continue
 
-        for i in range(len(extracted)): # Das aktuelle alt / href tuple (image / https://something.com)
-            image_alt, href = extracted[i] # alt-Text und href des extrahierten Matches
+        for image in extracted: # Das aktuelle alt / href tuple (image / https://something.com)
+            image_alt, href = image # alt-Text und href des extrahierten Matches
 
             img_delimiter = f"![{image_alt}]({href})" # der Delimiter, nach dem ich den Text splite
 
-            before, after = text_contents.split(img_delimiter, 1) # erster Splice, mit
+            sections = text_contents.split(img_delimiter, 1) # erster Splice, mit
+            if len(sections) != 2:
+                raise ValueError("invalid markdown, image section not closed")
+            before, after = sections
+            if before != "":
+                new_nodes.append(
+                    TextNode(before, TextType.TEXT)
+                )
 
-            if before:
-                new_nodes.append(TextNode(before, TextType.TEXT))
-
-            new_nodes.append(TextNode(image_alt, TextType.IMAGE, href))
+            new_nodes.append(
+                TextNode(
+                    image_alt,
+                    TextType.IMAGE,
+                    href
+                )
+            )
 
             text_contents = after
 
-        if len(text_contents) > 0:
+        if len(text_contents) > 0: # oder wieder eine != "" zum Check nach nicht empty string
             new_nodes.append(TextNode(text_contents, TextType.TEXT))
 
     return new_nodes
@@ -62,30 +74,42 @@ def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
 def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
     new_nodes = []
     for old_node in old_nodes:
-        text_contents = old_node.text
-        if not text_contents:
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
             continue
+
+        text_contents = old_node.text
 
         extracted = extract_markdown_links(text_contents)  # List mit Tuplen der extrahierten Infos
         if not extracted:
             new_nodes.append(old_node)
             continue
 
-        for i in range(len(extracted)):  # Das aktuelle alt / href tuple (image / https://something.com)
-            target, href = extracted[i]  # alt-Text und href des extrahierten Matches
+        for image in extracted:  # Das aktuelle alt / href tuple (image / https://something.com)
+            image_alt, href = image  # alt-Text und href des extrahierten Matches
 
-            img_delimiter = f"[{target}]({href})"  # der Delimiter, nach dem ich den Text splite
+            img_delimiter = f"[{image_alt}]({href})"  # der Delimiter, nach dem ich den Text splite
 
-            before, after = text_contents.split(img_delimiter, 1)  # erster Splice, mit
+            sections = text_contents.split(img_delimiter, 1)  # erster Splice, mit
+            if len(sections) != 2:
+                raise ValueError("invalid markdown, image section not closed")
+            before, after = sections
+            if before != "":
+                new_nodes.append(
+                    TextNode(before, TextType.TEXT)
+                )
 
-            if before:
-                new_nodes.append(TextNode(before, TextType.TEXT))
-
-            new_nodes.append(TextNode(target, TextType.LINK, href))
+            new_nodes.append(
+                TextNode(
+                    image_alt,
+                    TextType.LINK,
+                    href
+                )
+            )
 
             text_contents = after
 
-        if len(text_contents) > 0:
+        if len(text_contents) > 0:  # oder wieder eine != "" zum Check nach nicht empty string
             new_nodes.append(TextNode(text_contents, TextType.TEXT))
 
     return new_nodes
