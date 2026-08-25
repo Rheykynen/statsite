@@ -34,26 +34,64 @@ def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
         text_contents = old_node.text
 
         extracted = extract_markdown_images(text_contents) # List mit Tuplen der extrahierten Infos
-        matches = len(extracted) # Wie viele alt / href Tuple ich habe
 
-        for extract in extracted: # Das aktuelle alt / href tuple (image / https://something.com)
-            current_match = extract
+        for i in range(len(extracted)): # Das aktuelle alt / href tuple (image / https://something.com)
+            current_match = extracted[i]
             image_alt = current_match[0] # image
             href = current_match[1] # https://something.com
+
             delimiter = f"![{image_alt}]({href})"
+
             section = text_contents.split(delimiter, 1)
-            print(section)
-            new_nodes.append(TextNode(section[0], TextType.TEXT))
-            new_nodes.append(TextNode(extract[0], TextType.IMAGE, extract[1]))
-            text_contents = text_contents.replace(f"{section[0]}{delimiter}", "")
-            print(text_contents)
-    print(new_nodes)
+            if section[0]:
+                new_nodes.append(TextNode(section[0], TextType.TEXT))
+                new_nodes.append(TextNode(current_match[0], TextType.IMAGE, current_match[1]))
+                text_contents = text_contents.replace(f"{section[0]}{delimiter}", "")
+
+            elif section[1]:
+                new_nodes.append(TextNode(current_match[0], TextType.IMAGE, current_match[1]))
+
+                new_nodes.append(TextNode(section[1], TextType.TEXT))
+
+                text_contents = text_contents.replace(f"{section[0]}{delimiter}", "")
+
+            #print(text_contents)
+
+    #print(new_nodes)
     return new_nodes
 
 
 
 def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
-    pass
+    new_nodes = []
+    for old_node in old_nodes:
+        text_contents = old_node.text
+
+        extracted = extract_markdown_images(text_contents)  # List mit Tuplen der extrahierten Infos
+
+        for i in range(len(extracted)):  # Das aktuelle alt / href tuple (image / https://something.com)
+            current_match = extracted[i]
+            image_alt = current_match[0]  # image
+            href = current_match[1]  # https://something.com
+
+            delimiter = f"[{image_alt}]({href})"
+
+            section = text_contents.split(delimiter, 1)
+            if section[0]:
+                new_nodes.append(TextNode(section[0], TextType.TEXT))
+                new_nodes.append(TextNode(current_match[0], TextType.IMAGE, current_match[1]))
+                text_contents = text_contents.replace(f"{section[0]}{delimiter}", "")
+
+            elif section[1]:
+                new_nodes.append(TextNode(current_match[0], TextType.IMAGE, current_match[1]))
+
+                new_nodes.append(TextNode(section[1], TextType.TEXT))
+
+                text_contents = text_contents.replace(f"{section[0]}{delimiter}", "")
+
+            # print(text_contents)
+
+    return new_nodes
 
 def extract_markdown_images(text):
     matches = re.findall(r"!\[(.*?)\]\((https:.*?)\)", text)  # r"!\[([^\[\]]*)\]\(([^\(\)]*)\)" bootdev

@@ -58,5 +58,22 @@ class TestDelimiter(unittest.TestCase):
             new_nodes,
         )
 
+    def test_split_image_first(self):
+        node = TextNode(
+            "![image of a cat](https://preview.redd.it/low-res-image-of-cat-drooling-v0-dj8e3ngjr3lg1.jpeg?width=320&crop=smart&auto=webp&s=5609ee0e20a8329c434d8424c0f10f4b2d8cd0bb)How do you like the drooling cat meme?", TextType.TEXT
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("image of a cat", TextType.IMAGE, "https://preview.redd.it/low-res-image-of-cat-drooling-v0-dj8e3ngjr3lg1.jpeg?width=320&crop=smart&auto=webp&s=5609ee0e20a8329c434d8424c0f10f4b2d8cd0bb"),
+                TextNode("How do you like the drooling cat meme?", TextType.TEXT),
+            ],
+            new_nodes,
+        )
+
+    def test_split_image_second(self):
+        pass
+
+
 if __name__ == '__main__':
     unittest.main()
