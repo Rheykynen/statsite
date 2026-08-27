@@ -145,9 +145,3 @@ def text_to_textnodes(text: str) -> list[TextNode]:
     new_nodes = split_nodes_image(new_nodes)
     new_nodes = split_nodes_link(new_nodes)
     return new_nodes
-
-def main():
-    text_to_textnodes("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)")
-
-if __name__ == "__main__":
-    main()

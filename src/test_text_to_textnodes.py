@@ -39,3 +39,6 @@ class TestDelimiter(unittest.TestCase):
                 TextNode("link", TextType.LINK, "https://boot.dev"),
             ]
         )
+    def test_nested_text_to_textnode3(self):
+        with self.assertRaises(Exception):
+            text_to_textnodes("This has **bold _and italic_ inside**")
