@@ -48,9 +48,3 @@ def text_node_to_html_node(text_node : TextNode) -> LeafNode:
             raise ValueError(f"invalid URL")
         return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
     raise ValueError(f"invalid text type: {text_node.text_type}")
-
-def main():
-    text_node_to_html_node(TextNode("Das ist ein Text", TextType.LINK, "https://www.boot.dev"))
-
-if __name__ == "__main__":
-    main()

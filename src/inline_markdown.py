@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from textnode import TextNode, TextType
 import re
 
@@ -26,6 +28,17 @@ def split_nodes_delimiter(
     return new_nodes
 
 
+def extract_markdown_images(text):
+    matches = re.findall(r"!\[(.*?)\]\((https:.*?)\)", text)  # r"!\[([^\[\]]*)\]\(([^\(\)]*)\)" bootdev
+    return matches
+
+def extract_markdown_links(text):
+    matches = re.findall(r"\[(.*?)\]\((https.*?)\)", text) # r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)" bootdev
+    return matches
+    # /w+ funktioniert nicht, da es nur zusammenhängende Wörter akzeptiert. Da beim Beispiel nach 'Rick' ' Roll' kam,
+    # hat der Regex bei space abgebrochen.
+    # mit dem r"" braucht es kein backslash vor / und ebenso hat regex keine Funktion mit /, welche Backslash benötigen würde
+
 def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
     new_nodes = []
     for old_node in old_nodes:
@@ -43,7 +56,7 @@ def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
         for image in extracted: # Das aktuelle alt / href tuple (image / https://something.com)
             image_alt, href = image # alt-Text und href des extrahierten Matches
 
-            img_delimiter = f"![{image_alt}]({href})" # der Delimiter, nach dem ich den Text splite
+            img_delimiter = f"![{image_alt}]({href})" # der Delimiter, nach dem ich den Text splitte
 
             sections = text_contents.split(img_delimiter, 1) # erster Splice, mit
             if len(sections) != 2:
@@ -69,8 +82,6 @@ def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
 
     return new_nodes
 
-
-
 def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
     new_nodes = []
     for old_node in old_nodes:
@@ -86,9 +97,9 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
             continue
 
         for image in extracted:  # Das aktuelle alt / href tuple (image / https://something.com)
-            image_alt, href = image  # alt-Text und href des extrahierten Matches
+            target, href = image  # alt-Text und href des extrahierten Matches
 
-            img_delimiter = f"[{image_alt}]({href})"  # der Delimiter, nach dem ich den Text splite
+            img_delimiter = f"[{target}]({href})"  # der Delimiter, nach dem ich den Text splite
 
             sections = text_contents.split(img_delimiter, 1)  # erster Splice, mit
             if len(sections) != 2:
@@ -101,7 +112,7 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
 
             new_nodes.append(
                 TextNode(
-                    image_alt,
+                    target,
                     TextType.LINK,
                     href
                 )
@@ -114,13 +125,33 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
 
     return new_nodes
 
-def extract_markdown_images(text):
-    matches = re.findall(r"!\[(.*?)\]\((https:.*?)\)", text)  # r"!\[([^\[\]]*)\]\(([^\(\)]*)\)" bootdev
-    return matches
 
-def extract_markdown_links(text):
-    matches = re.findall(r"\[(.*?)\]\((https.*?)\)", text) # r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)" bootdev
-    return matches
-    # /w+ funktioniert nicht, da es nur zusammenhängende Wörter akzeptiert. Da beim Beispiel nach 'Rick' ' Roll' kam,
-    # hat der Regex bei space abgebrochen.
-    # mit dem r"" braucht es kein backslash vor / und ebenso hat regex keine Funktion mit /, welche Backslash benötigen würde
+
+def text_to_textnodes(text: str) -> list[TextNode]:
+    new_nodes = []
+    node = TextNode(text, TextType.TEXT)
+    new_nodes.append(node)
+
+    delimiter_mapping = {
+        "**": TextType.BOLD,
+        "_": TextType.ITALIC,
+        "`": TextType.CODE,
+    }
+
+    for key, value in delimiter_mapping.items():
+
+        new_nodes = split_nodes_delimiter(
+                new_nodes,
+                key,
+                delimiter_mapping[key],
+            )
+    new_nodes = split_nodes_image(new_nodes)
+    new_nodes = split_nodes_link(new_nodes)
+    #pprint(new_nodes)
+    return new_nodes
+
+def main():
+    text_to_textnodes("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)")
+
+if __name__ == "__main__":
+    main()
