@@ -128,26 +128,22 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
 
 
 def text_to_textnodes(text: str) -> list[TextNode]:
-    new_nodes = []
-    node = TextNode(text, TextType.TEXT)
-    new_nodes.append(node)
-
+    new_nodes = [
+        TextNode(text, TextType.TEXT)
+    ]
     delimiter_mapping = {
         "**": TextType.BOLD,
         "_": TextType.ITALIC,
         "`": TextType.CODE,
     }
-
-    for key, value in delimiter_mapping.items():
-
+    for delimiter, text_type in delimiter_mapping.items():
         new_nodes = split_nodes_delimiter(
                 new_nodes,
-                key,
-                delimiter_mapping[key],
+                delimiter,
+                text_type,
             )
     new_nodes = split_nodes_image(new_nodes)
     new_nodes = split_nodes_link(new_nodes)
-    #pprint(new_nodes)
     return new_nodes
 
 def main():
