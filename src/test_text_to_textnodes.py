@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType
-from inline_markdown import text_to_textnodes, markdown_to_blocks
+from inline_markdown import text_to_textnodes
 
 class TestDelimiter(unittest.TestCase):
     def test_text_to_textnode1(self):
@@ -43,106 +43,3 @@ class TestDelimiter(unittest.TestCase):
         with self.assertRaises(Exception):
             text_to_textnodes("This has **bold _and italic_ inside**")
 
-    def test_markdown_to_blocks(self):
-            md = """
-This is **bolded** paragraph
-
-This is another paragraph with _italic_ text and `code` here
-This is the same paragraph on a new line
-
-- This is a list
-- with items
-"""
-            blocks = markdown_to_blocks(md)
-            self.assertEqual(
-                blocks,
-                [
-                    "This is **bolded** paragraph",
-                    "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
-                    "- This is a list\n- with items",
-                ],
-            )
-
-    def test_markdown_to_blocks2(self):
-        md = """
-This is **bolded** paragraph
-
-This is another paragraph with _italic_ text and `code` here
-This is the same paragraph on a new line
-
-- This is a list
-- with items
-
-This is another paragraph with _italic_ text and `code` here
-This is the same paragraph on a new line
-
-This is **bolded** paragraph
-
-"""
-        blocks = markdown_to_blocks(md)
-        self.assertEqual(
-            blocks,
-            [
-                "This is **bolded** paragraph",
-                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
-                "- This is a list\n- with items",
-                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
-                "This is **bolded** paragraph",
-
-            ],
-        )
-
-    def test_markdown_to_blocks_with_wrong_linebreaks(self):
-        md = """
-This is **bolded** paragraph
-
-
-
-This is another paragraph with _italic_ text and `code` here
-This is the same paragraph on a new line
-
-
-- This is a list
-- with items
-
-This is another paragraph with _italic_ text and `code` here
-
-This is the same paragraph on a new line
-
-
-This is **bolded** paragraph
-
-"""
-        blocks = markdown_to_blocks(md)
-        self.assertEqual(
-            blocks,
-            [
-                "This is **bolded** paragraph",
-                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
-                "- This is a list\n- with items",
-                "This is another paragraph with _italic_ text and `code` here",
-                "This is the same paragraph on a new line",
-                "This is **bolded** paragraph",
-
-            ],
-        )
-
-    def deactivated_test_markdown_to_blocks4(self):
-            md = """
-This is **bolded** paragraph
-
-   This is another paragraph with _italic_ text and `code` here
-   This is the same paragraph on a new line
-
-- This is a list
-- with items
-"""
-            blocks = markdown_to_blocks(md)
-            self.assertEqual(
-                blocks,
-                [
-                    "This is **bolded** paragraph",
-                    "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
-                    "- This is a list\n- with items",
-                ],
-            )
