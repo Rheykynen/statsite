@@ -80,6 +80,18 @@ def clean_block_string(block: str) -> str:
 def clean_heading(block: str, heading: int) -> str:
     return block[heading:].strip()
 
+def clean_quote_string(block: str) -> str:
+    return block.replace(">", " ").strip()
+
+def make_list_strings(block: str):
+    assert block.startswith("- ") or block.startswith("1. ")
+    new = ""
+    ulist = block.split("\n")
+    for line in ulist:
+        content = line[2:].strip()
+        new += f"<li>{content}</li>"
+    return new
+
 def text_to_children(text: str, block_node) -> HTMLNode:
     text_node = text_to_textnodes(text)
     for node in text_node:
@@ -92,6 +104,8 @@ def block_to_nodes(tag, block):
     block_node = ParentNode(tag, [])
     leafs = text_to_children(block, block_node)
     return leafs
+
+
 
 def markdown_to_html_node(markdown: str) -> HTMLNode:
     """
@@ -125,15 +139,25 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
 
 
         if block_type == BlockType.QUOTE:
-            node = HTMLNode("quote", block)
+            text = clean_quote_string(block)
+            leafs = block_to_nodes(
+                "blockquote", text
+            )
+            html_node.children.append(leafs)
 
         if block_type == BlockType.ULIST:
-            node = HTMLNode("ul", block)
-
+            text = make_list_strings(block)
+            leafs = block_to_nodes(
+                "ul", text
+            )
+            html_node.children.append(leafs)
 
         if block_type == BlockType.OLIST:
-            node = HTMLNode("ol", block)
-
+            text = make_list_strings(block)
+            leafs = block_to_nodes(
+                "ol", text
+            )
+            html_node.children.append(leafs)
 
         if block_type == BlockType.CODE:
             node = HTMLNode("code", block)
