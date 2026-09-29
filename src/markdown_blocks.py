@@ -1,9 +1,8 @@
 from enum import Enum
 
-from htmlnode import ParentNode, LeafNode, HTMLNode
+from htmlnode import ParentNode, HTMLNode
 from inline_markdown import text_to_textnodes
-from textnode import TextNode, text_node_to_html_node
-
+from textnode import TextNode, text_node_to_html_node, TextType
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
@@ -83,6 +82,9 @@ def clean_heading(block: str, heading: int) -> str:
 def clean_quote_string(block: str) -> str:
     return block.replace(">", " ").strip()
 
+def clean_code_block(block: str) -> str:
+    return block.replace("```", "").strip()
+
 def make_list_strings(block: str):
     assert block.startswith("- ") or block.startswith("1. ")
     new = ""
@@ -106,6 +108,16 @@ def block_to_nodes(tag, block):
     return leafs
 
 
+def code_type_handler(block):
+    block_node = ParentNode("code", [])
+
+    text = clean_code_block(block)
+
+    code_node = TextNode(text, TextType.TEXT)
+
+    leaf = text_node_to_html_node(code_node)
+    block_node.children.append(leaf)
+    return block_node
 
 def markdown_to_html_node(markdown: str) -> HTMLNode:
     """
@@ -160,8 +172,8 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
             html_node.children.append(leafs)
 
         if block_type == BlockType.CODE:
-            node = HTMLNode("code", block)
-
+            code_node = code_type_handler(block)
+            html_node.children.append(code_node)
 
 
     print(f"Node:\n{html_node}\n\n")
@@ -204,6 +216,17 @@ this should be a normal paragraph
 - oh
 - a list
 - how wonderful
+
+1. How to get kicked in the balls
+This is a guide how to fuck up a ordered list and subsequent _consequences_.
+""",
+"""
+``` 
+This is a code Markdown block.
+it stretches over two rows
+```
+
+But this is a paragraph with `code` in the middle of it.
 """
     ]
     for thing in examples:
