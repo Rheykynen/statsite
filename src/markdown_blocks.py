@@ -1,9 +1,8 @@
 from enum import Enum
 
-from htmlnode import HTMLNode
-from src.htmlnode import ParentNode, LeafNode
-from src.inline_markdown import text_to_textnodes
-from src.textnode import TextNode, text_node_to_html_node
+from htmlnode import ParentNode, LeafNode, HTMLNode
+from inline_markdown import text_to_textnodes
+from textnode import TextNode, text_node_to_html_node
 
 
 class BlockType(Enum):
@@ -66,21 +65,33 @@ def block_to_block_type(block: str) -> BlockType:
 
     return BlockType.PARAGRAPH
 
-def text_to_children(text: str):
-    node = text_to_textnodes(text)
-    print(node)
-    return node
-
-def determine_heading_type(block: str) -> str:
+def determine_heading_type(block: str) -> int:
     heading = 0
     for letter in block:
         if letter == "#":
             heading += 1
             continue
-        if heading > 6:
-            break
+        return heading
 
-    return str(heading)
+
+def clean_block_string(block: str) -> str:
+    return block.replace("\n", " ").strip()
+
+def clean_heading(block: str, heading: int) -> str:
+    return block[heading:].strip()
+
+def text_to_children(text: str, block_node) -> HTMLNode:
+    text_node = text_to_textnodes(text)
+    for node in text_node:
+        block_node.children.append(
+            text_node_to_html_node(node)
+        )
+    return block_node
+
+def block_to_nodes(tag, block):
+    block_node = ParentNode(tag, [])
+    leafs = text_to_children(block, block_node)
+    return leafs
 
 def markdown_to_html_node(markdown: str) -> HTMLNode:
     """
@@ -91,29 +102,27 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
     - Leaf Nodes sind die Inline Blocks, von text to children, -> raw TextNode > LeafNode via text_node_to_html_node
     """
     blocks = markdown_to_blocks(markdown) # mach aus Markdown blöcke
-
+    html_node = ParentNode("div", [])
     for block in blocks:
         block_type = block_to_block_type(block) # ich bestimme den Block-Typ
+
         if block_type == BlockType.PARAGRAPH:
-            # Jetzt habe ich den Text-Block mit inline markdown. Heißt, ich muss das herausholen
-            text_node = text_to_textnodes(block) # das sollte meine fertige Liste an Textnodes sein
-            #print(text_node)
-            for i, item in enumerate(text_node, start=1):
-                print(f"{i}: {item}") #der kleinste Markdown Teil, eine Liste mit TextNodes
-                print(f"{item.text_type}\n")
-                stuff = text_node_to_html_node(item)
-                #print(stuff)
-                # Jetzt muss ich die einzelnen TextNodes in ein leafnode umwandeln und an einen Parent anheften.
-                # also pro md Block einen Parent
+            text = clean_block_string(block)
 
-
+            leafs = block_to_nodes(
+                "p", text
+            )
+            html_node.children.append(leafs)
 
         if block_type == BlockType.HEADING:
             heading = determine_heading_type(block)
-            node = HTMLNode(f"h{heading}", block)
+            text = clean_heading(block, heading)
 
-        if block_type == BlockType.CODE:
-            node = HTMLNode("code", block)
+            leafs = block_to_nodes(
+                f"h{heading}", text
+            )
+            html_node.children.append(leafs)
+
 
         if block_type == BlockType.QUOTE:
             node = HTMLNode("quote", block)
@@ -125,6 +134,13 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
         if block_type == BlockType.OLIST:
             node = HTMLNode("ol", block)
 
+
+        if block_type == BlockType.CODE:
+            node = HTMLNode("code", block)
+
+
+
+    print(f"Node:\n{html_node}\n\n")
 
 
 
@@ -153,6 +169,17 @@ There is no Tag here.
 3. third item of a list
 4. Lists are not fun
 
+""",
+"""
+## This is heading nummero 2
+
+> this is a very fancy quote one needs to have a very high intelligence
+
+this should be a normal paragraph
+
+- oh
+- a list
+- how wonderful
 """
     ]
     for thing in examples:
