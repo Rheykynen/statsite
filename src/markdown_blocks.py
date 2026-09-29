@@ -80,10 +80,11 @@ def clean_heading(block: str, heading: int) -> str:
     return block[heading:].strip()
 
 def clean_quote_string(block: str) -> str:
-    return block.replace(">", " ").strip()
+    return block[2:].strip()
 
 def clean_code_block(block: str) -> str:
-    return block.replace("```", "").strip()
+    cleaned = block.replace("```", "").strip()
+    return f"<code>{cleaned}\n</code>"
 
 def make_list_strings(block: str):
     assert block.startswith("- ") or block.startswith("1. ")
@@ -109,7 +110,7 @@ def block_to_nodes(tag, block):
 
 
 def code_type_handler(block):
-    block_node = ParentNode("code", [])
+    block_node = ParentNode("pre", [])
 
     text = clean_code_block(block)
 
@@ -176,7 +177,7 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
             html_node.children.append(code_node)
 
 
-    print(f"Node:\n{html_node}\n\n")
+    return html_node
 
 
 
