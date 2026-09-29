@@ -2,6 +2,7 @@ from enum import Enum
 
 from htmlnode import HTMLNode
 from src.htmlnode import ParentNode, LeafNode
+from src.inline_markdown import text_to_textnodes
 from src.textnode import TextNode, text_node_to_html_node
 
 
@@ -66,7 +67,20 @@ def block_to_block_type(block: str) -> BlockType:
     return BlockType.PARAGRAPH
 
 def text_to_children(text: str):
-    pass
+    node = text_to_textnodes(text)
+    print(node)
+    return node
+
+def determine_heading_type(block: str) -> str:
+    heading = 0
+    for letter in block:
+        if letter == "#":
+            heading += 1
+            continue
+        if heading > 6:
+            break
+
+    return str(heading)
 
 def markdown_to_html_node(markdown: str) -> HTMLNode:
     """
@@ -76,24 +90,27 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
     - block ist ein ParentNode, manchmal nested bei ul oder li
     - Leaf Nodes sind die Inline Blocks, von text to children, -> raw TextNode > LeafNode via text_node_to_html_node
     """
-    blocks = markdown_to_blocks(markdown)
-    html_node = ParentNode("div", None, None)
+    blocks = markdown_to_blocks(markdown) # mach aus Markdown blöcke
 
     for block in blocks:
-        block_type = block_to_block_type(block)
-
+        block_type = block_to_block_type(block) # ich bestimme den Block-Typ
         if block_type == BlockType.PARAGRAPH:
-            node = LeafNode("p", block)
+            # Jetzt habe ich den Text-Block mit inline markdown. Heißt, ich muss das herausholen
+            text_node = text_to_textnodes(block) # das sollte meine fertige Liste an Textnodes sein
+            #print(text_node)
+            for i, item in enumerate(text_node, start=1):
+                print(f"{i}: {item}") #der kleinste Markdown Teil, eine Liste mit TextNodes
+                print(f"{item.text_type}\n")
+                stuff = text_node_to_html_node(item)
+                #print(stuff)
+                # Jetzt muss ich die einzelnen TextNodes in ein leafnode umwandeln und an einen Parent anheften.
+                # also pro md Block einen Parent
+
+
 
         if block_type == BlockType.HEADING:
             heading = determine_heading_type(block)
             node = HTMLNode(f"h{heading}", block)
-            text = TextNode(block, block_type)
-            print(type(text))
-            html_node = text_node_to_html_node(text)
-            print(f"TextNode: {text}")
-            print(f"HTMLNode: {html_node}")
-
 
         if block_type == BlockType.CODE:
             node = HTMLNode("code", block)
@@ -109,16 +126,7 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
             node = HTMLNode("ol", block)
 
 
-def determine_heading_type(block: str) -> str:
-    heading = 0
-    for letter in block:
-        if letter == "#":
-            heading += 1
-            continue
-        if heading > 6:
-            break
 
-    return str(heading)
 
 def main():
     examples = [
@@ -133,12 +141,17 @@ This is another paragraph with _italic_ text and `code` here
 """
 # This is **bolded** heading
 
-text in a p
-tag here
+This is a paragraph.
+There is no Tag here.
 
 ## This is another paragraph with _italic_ text and `code` here
 
 ###### This is the smallest heading possible
+
+1. A list
+2. second item of a list
+3. third item of a list
+4. Lists are not fun
 
 """
     ]

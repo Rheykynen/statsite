@@ -29,8 +29,7 @@ class TextNode:
        return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
 
 def text_node_to_html_node(text_node : TextNode) -> LeafNode:
-    if text_node.text_type is None:
-        raise Exception(f"node has no text_type")
+    print(text_node.text_type)
     if text_node.text_type == TextType.TEXT:
         return LeafNode(None, text_node.text)
     elif text_node.text_type == TextType.BOLD:
