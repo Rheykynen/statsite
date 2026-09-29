@@ -69,9 +69,11 @@ def determine_heading_type(block: str) -> int:
     for letter in block:
         if letter == "#":
             heading += 1
-            continue
-        return heading
-
+        else:
+            break
+    if heading + 1 >= len(block):
+        raise ValueError(f"invalid heading level: {heading}")
+    return heading
 
 def clean_block_string(block: str) -> str:
     return block.replace("\n", " ").strip()
@@ -82,18 +84,15 @@ def clean_heading(block: str, heading: int) -> str:
 def clean_quote_string(block: str) -> str:
     return block[2:].strip()
 
-def clean_code_block(block: str) -> str:
-    cleaned = block.replace("```", "").strip()
-    return f"<code>{cleaned}\n</code>"
-
-def make_list_strings(block: str):
-    assert block.startswith("- ") or block.startswith("1. ")
-    new = ""
+def make_list_nodes(tag: str, block: str):
     ulist = block.split("\n")
+    list_items = []
     for line in ulist:
         content = line[2:].strip()
-        new += f"<li>{content}</li>"
-    return new
+        li_node = ParentNode("li", [])
+        text_to_children(content, li_node)
+        list_items.append(li_node)
+    return ParentNode(tag, list_items)
 
 def text_to_children(text: str, block_node) -> HTMLNode:
     text_node = text_to_textnodes(text)
@@ -108,31 +107,19 @@ def block_to_nodes(tag, block):
     leafs = text_to_children(block, block_node)
     return leafs
 
-
-def code_type_handler(block):
-    block_node = ParentNode("pre", [])
-
-    text = clean_code_block(block)
-
-    code_node = TextNode(text, TextType.TEXT)
-
-    leaf = text_node_to_html_node(code_node)
-    block_node.children.append(leaf)
-    return block_node
+def code_type_handler(block: str) -> ParentNode:
+    cleaned = block[4:-3]
+    code_text_node = TextNode(cleaned, TextType.TEXT)
+    code_leaf = text_node_to_html_node(code_text_node)
+    code_node = ParentNode("code", [code_leaf])
+    return ParentNode("pre", [code_node])
 
 def markdown_to_html_node(markdown: str) -> HTMLNode:
-    """
-    - nehme den Markdowntext, splitte es in Blöcke
-    - bestimme den Texttyp und erstelle daraus eine HTMLNode
-    - doc ist ParentNode(div,...)
-    - block ist ein ParentNode, manchmal nested bei ul oder li
-    - Leaf Nodes sind die Inline Blocks, von text to children, -> raw TextNode > LeafNode via text_node_to_html_node
-    """
     blocks = markdown_to_blocks(markdown) # mach aus Markdown blöcke
     html_node = ParentNode("div", [])
     for block in blocks:
-        block_type = block_to_block_type(block) # ich bestimme den Block-Typ
 
+        block_type = block_to_block_type(block) # ich bestimme den Block-Typ
         if block_type == BlockType.PARAGRAPH:
             text = clean_block_string(block)
 
@@ -150,7 +137,6 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
             )
             html_node.children.append(leafs)
 
-
         if block_type == BlockType.QUOTE:
             text = clean_quote_string(block)
             leafs = block_to_nodes(
@@ -159,79 +145,15 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
             html_node.children.append(leafs)
 
         if block_type == BlockType.ULIST:
-            text = make_list_strings(block)
-            leafs = block_to_nodes(
-                "ul", text
-            )
-            html_node.children.append(leafs)
+            ul_parent = make_list_nodes("ul", block)
+            html_node.children.append(ul_parent)
 
         if block_type == BlockType.OLIST:
-            text = make_list_strings(block)
-            leafs = block_to_nodes(
-                "ol", text
-            )
-            html_node.children.append(leafs)
+            ol_parent = make_list_nodes("ol", block)
+            html_node.children.append(ol_parent)
 
         if block_type == BlockType.CODE:
             code_node = code_type_handler(block)
             html_node.children.append(code_node)
 
-
     return html_node
-
-
-
-def main():
-    examples = [
-"""
-This is **bolded** paragraph
-text in a p
-tag here
-
-This is another paragraph with _italic_ text and `code` here
-
-""",
-"""
-# This is **bolded** heading
-
-This is a paragraph.
-There is no Tag here.
-
-## This is another paragraph with _italic_ text and `code` here
-
-###### This is the smallest heading possible
-
-1. A list
-2. second item of a list
-3. third item of a list
-4. Lists are not fun
-
-""",
-"""
-## This is heading nummero 2
-
-> this is a very fancy quote one needs to have a very high intelligence
-
-this should be a normal paragraph
-
-- oh
-- a list
-- how wonderful
-
-1. How to get kicked in the balls
-This is a guide how to fuck up a ordered list and subsequent _consequences_.
-""",
-"""
-``` 
-This is a code Markdown block.
-it stretches over two rows
-```
-
-But this is a paragraph with `code` in the middle of it.
-"""
-    ]
-    for thing in examples:
-        markdown_to_html_node(thing)
-
-if __name__ == "__main__":
-    main()
