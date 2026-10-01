@@ -1,12 +1,14 @@
 from markdown_blocks import markdown_to_html_node
 import os
 
+
 def extract_title(markdown):
     lines = markdown.split("\n")
     for line in lines:
         if line.startswith("# "):
             return line.strip("#").strip(" ")
     raise Exception("no h1 header in markdown")
+
 
 def generate_page(
         from_path,
@@ -30,13 +32,30 @@ def generate_page(
         .replace("{{ Content }}", html_str)
     )
 
-    os.makedirs(dest_path, exist_ok=True)
+    dest_dir_path = os.path.dirname(dest_path)
+    if dest_dir_path != "":
+        os.makedirs(dest_dir_path, exist_ok=True)
 
-    destination_path = os.path.join(dest_path, "index.html")
-    print(f"Writing to {destination_path}")
-
-    with open(destination_path, "w") as f:
+    with open(dest_path, "w") as f:
         f.write(html_file)
 
 
+def generate_pages_recursive(
+        dir_path_content,
+        template_path,
+        dir_path_dest,
+):
+    for item in os.listdir(dir_path_content):
+        item_path = os.path.join(dir_path_content, item)
+        dest_path = os.path.join(dir_path_dest, "index.html")
+
+        if os.path.isfile(item_path):
+            generate_page(
+                item_path,
+                template_path,
+                dest_path
+            )
+        else:
+            dest_path_dir = os.path.join(dir_path_dest, item)
+            generate_pages_recursive(item_path, template_path, dest_path_dir)
 
