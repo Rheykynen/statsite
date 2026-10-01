@@ -11,9 +11,8 @@ dir_path_public = "./docs"
 dir_path_content = "./content"
 path_template = "./template.html"
 
-basepath = sys.argv
-if not basepath:
-    basepath = "/"
+basepath = sys.argv[1] if len(sys.argv) > 1 else "/"
+
 
 def main():
     print("Deleting public directory...")
