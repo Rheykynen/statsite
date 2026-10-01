@@ -27,7 +27,6 @@ def split_nodes_delimiter(
 
     return new_nodes
 
-
 def extract_markdown_images(text):
     matches = re.findall(r"!\[(.*?)\]\((https:.*?)\)", text)  # r"!\[([^\[\]]*)\]\(([^\(\)]*)\)" bootdev
     return matches
@@ -124,8 +123,6 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
             new_nodes.append(TextNode(text_contents, TextType.TEXT))
 
     return new_nodes
-
-
 
 def text_to_textnodes(text: str) -> list[TextNode]:
     new_nodes = [
