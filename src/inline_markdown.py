@@ -27,14 +27,15 @@ def split_nodes_delimiter(
 
     return new_nodes
 
+
+# Funktioniert nicht, weil es nur https: URLs zulässt, lokal oder http werden ignoriert
+#    image_matches = re.findall(r"!\[(.*?)\]\((https:.*?)\)", text)
+#    link_matches = re.findall(r"\[(.*?)\]\((https.*?)\)", text)
 def extract_markdown_images(text):
-    # matches = re.findall(r"!\[(.*?)\]\((https:.*?)\)", text)  mine
     matches = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text) # bootdev
     return matches
 
-
 def extract_markdown_links(text):
-    #matches = re.findall(r"\[(.*?)\]\((https.*?)\)", text) # bootdev
     matches = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)" , text)
     return matches
     # /w+ funktioniert nicht, da es nur zusammenhängende Wörter akzeptiert. Da beim Beispiel nach 'Rick' ' Roll' kam,
