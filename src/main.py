@@ -2,7 +2,7 @@ import shutil
 import os
 
 from copystatic import copy_static_to_public
-
+from generate_page import generate_page
 
 path_static = "./static"
 path_public = "./public"
@@ -17,4 +17,10 @@ def main():
     copy_static_to_public(path_static, path_public)
 
 if __name__ == "__main__":
+    from_path = "./content/index.md"
+    template_path = "./template.html"
+    dest_path = "./public"
+
+    generate_page(from_path, template_path, dest_path)
+
     main()
