@@ -33,7 +33,7 @@ def block_to_block_type(block: str) -> BlockType:
     bestimmt den Block-Type basierend auf den einzelnen Markdown-Blöcken
     """
     if block.startswith(
-            ("#", "##", "###", "####", "#####", "######")
+            ("# ", "## ", "### ", "#### ", "##### ", "###### ")
     ):
         return BlockType.HEADING
 
