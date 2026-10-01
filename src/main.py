@@ -4,8 +4,11 @@ import os
 from copystatic import copy_static_to_public
 from generate_page import generate_page
 
+
 path_static = "./static"
 path_public = "./public"
+from_path = "./content/index.md"
+template_path = "./template.html"
 
 def main():
     print("Deleting public directory...")
@@ -16,11 +19,8 @@ def main():
     print("Copying static files to public directory...")
     copy_static_to_public(path_static, path_public)
 
+    print("Generating html file...")
+    generate_page(from_path, template_path, path_public)
+
 if __name__ == "__main__":
-    from_path = "./content/index.md"
-    template_path = "./template.html"
-    dest_path = "./public"
-
-    generate_page(from_path, template_path, dest_path)
-
     main()

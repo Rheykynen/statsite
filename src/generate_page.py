@@ -31,6 +31,8 @@ def generate_page(
 
             destination_path = os.path.join(dest_path, "index.html")
             print(f"Writing to {destination_path}")
-            with open(destination_path, "w") as dest_file:
-                dest_file.write(html_file)
+
+            index_file = open(destination_path, "x")
+            index_file.write(html_file)
+            index_file.close()
 
