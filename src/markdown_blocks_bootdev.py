@@ -64,16 +64,6 @@ def block_to_block_type(block: str) -> BlockType:
 
     return BlockType.PARAGRAPH
 
-
-def markdown_to_html_node(markdown: str) -> ParentNode:
-    blocks = markdown_to_blocks(markdown)
-    children = []
-    for block in blocks:
-        html_node = block_to_html_node(block)
-        children.append(html_node)
-    return ParentNode("div", children, None)
-
-
 def block_to_html_node(block: str) -> ParentNode:
     block_type = block_to_block_type(block)
     if block_type == BlockType.PARAGRAPH:
