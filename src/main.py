@@ -2,13 +2,14 @@ import shutil
 import os
 
 from copystatic import copy_static_to_public
-from generate_page import generate_page
+from gencontent import generate_page
 
 
 path_static = "./static"
 path_public = "./public"
 from_path = "./content/index.md"
 template_path = "./template.html"
+
 
 def main():
     print("Deleting public directory...")
