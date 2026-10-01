@@ -28,6 +28,7 @@ def markdown_to_blocks(markdown: str) -> list[str]:
         )
     return filtered_blocks
 
+
 def block_to_block_type(block: str) -> BlockType:
     """
     bestimmt den Block-Type basierend auf den einzelnen Markdown-Blöcken
@@ -64,6 +65,7 @@ def block_to_block_type(block: str) -> BlockType:
 
     return BlockType.PARAGRAPH
 
+
 def determine_heading_type(block: str) -> int:
     heading = 0
     for letter in block:
@@ -75,14 +77,18 @@ def determine_heading_type(block: str) -> int:
         raise ValueError(f"invalid heading level: {heading}")
     return heading
 
+
 def clean_block_string(block: str) -> str:
     return block.replace("\n", " ").strip()
+
 
 def clean_heading(block: str, heading: int) -> str:
     return block[heading:].strip()
 
+
 def clean_quote_string(block: str) -> str:
     return block[2:].strip()
+
 
 def make_list_nodes(tag: str, block: str):
     ulist = block.split("\n")
@@ -94,6 +100,7 @@ def make_list_nodes(tag: str, block: str):
         list_items.append(li_node)
     return ParentNode(tag, list_items)
 
+
 def text_to_children(text: str, block_node) -> HTMLNode:
     text_node = text_to_textnodes(text)
     for node in text_node:
@@ -102,10 +109,12 @@ def text_to_children(text: str, block_node) -> HTMLNode:
         )
     return block_node
 
+
 def block_to_nodes(tag, block):
     block_node = ParentNode(tag, [])
     leafs = text_to_children(block, block_node)
     return leafs
+
 
 def code_type_handler(block: str) -> ParentNode:
     cleaned = block[4:-3]
@@ -113,6 +122,7 @@ def code_type_handler(block: str) -> ParentNode:
     code_leaf = text_node_to_html_node(code_text_node)
     code_node = ParentNode("code", [code_leaf])
     return ParentNode("pre", [code_node])
+
 
 def markdown_to_html_node(markdown: str) -> HTMLNode:
     blocks = markdown_to_blocks(markdown) # mach aus Markdown blöcke
