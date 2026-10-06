@@ -42,6 +42,7 @@ def generate_page(
     with open(dest_path, "w") as f:
         f.write(html_file)
 
+
 def generate_pages_recursive(
         base_path: str,
         dir_path_content: str,
